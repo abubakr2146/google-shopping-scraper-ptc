@@ -6,6 +6,7 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
+
 // Serve static files
 app.use(express.static('public'));
 app.use('/scraped_pages', express.static('scraped_pages'));
@@ -68,6 +69,7 @@ async function scrapeUrls(socket) {
         // Launch browser
         const browser = await puppeteer.launch({
             headless: 'new',
+            executablePath: '/usr/bin/chromium-browser',
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox'
