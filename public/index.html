@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Scraper Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .result-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        #scrapeButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        #scrapeButton:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Web Scraper Interface</h1>
+    <button id="scrapeButton">Start Scraping</button>
+    <div id="status"></div>
+    <div id="results"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const scrapeButton = document.getElementById('scrapeButton');
+        const statusDiv = document.getElementById('status');
+        const resultsDiv = document.getElementById('results');
+
+        // Load existing results when page loads
+        async function loadExistingResults() {
+            try {
+                const response = await fetch('/api/results');
+                const files = await response.json();
+                
+                files.forEach(filename => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    resultItem.innerHTML = `
+                        <a href="/scraped_pages/${filename}" target="_blank">
+                            ${filename}
+                        </a>
+                    `;
+                    resultsDiv.appendChild(resultItem);
+                });
+            } catch (error) {
+                console.error('Error loading results:', error);
+            }
+        }
+
+        // Load results on page load
+        loadExistingResults();
+
+        scrapeButton.addEventListener('click', () => {
+            scrapeButton.disabled = true;
+            statusDiv.textContent = 'Starting scraping process...';
+            socket.emit('start-scrape');
+        });
+
+        socket.on('scrape-progress', (data) => {
+            statusDiv.textContent = data.message;
+            if (data.filename) {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    <a href="/scraped_pages/${data.filename}" target="_blank">
+                        ${data.filename}
+                    </a>
+                `;
+                resultsDiv.insertBefore(resultItem, resultsDiv.firstChild);
+            }
+        });
+
+        socket.on('scrape-complete', () => {
+            scrapeButton.disabled = false;
+            statusDiv.textContent = 'Scraping completed!';
+        });
+
+        socket.on('scrape-error', (error) => {
+            statusDiv.textContent = `Error: ${error}`;
+            scrapeButton.disabled = false;
+        });
+    </script>
+</body>
+</html>
