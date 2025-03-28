@@ -17,78 +17,24 @@ node index.js
 
 3. Access the web interface at `http://localhost:3000`
 
-### Server Deployment (Linux)
+### Web App Deployment
 
-1. Install Node.js and npm if not already installed:
+1. Install dependencies:
 ```bash
-curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-sudo apt-get install -y nodejs
-```
-
-2. Install Chrome dependencies:
-```bash
-sudo apt-get update
-sudo apt-get install -y \
-    ca-certificates \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libc6 \
-    libcairo2 \
-    libcups2 \
-    libdbus-1-3 \
-    libexpat1 \
-    libfontconfig1 \
-    libgbm1 \
-    libgcc1 \
-    libglib2.0-0 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libstdc++6 \
-    libx11-6 \
-    libx11-xcb1 \
-    libxcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libxss1 \
-    libxtst6 \
-    lsb-release \
-    wget \
-    xdg-utils
-```
-
-3. Install Chrome:
-```bash
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo dpkg -i google-chrome-stable_current_amd64.deb
-```
-
-4. Clone the repository and install dependencies:
-```bash
-git clone <repository-url>
-cd <repository-directory>
 npm install
 ```
+This will automatically install Chrome via Puppeteer's browser installer.
 
-5. Set Chrome binary path (if needed):
+2. Start the server:
 ```bash
-export CHROME_BIN=/usr/bin/google-chrome
+npm start
 ```
 
-6. Run the server:
+The web interface will be available at the configured port (default: 3000).
+
+Note: The postinstall script will handle Chrome installation automatically. If you encounter any issues with Chrome installation, you can manually run:
 ```bash
-node index.js
+npx puppeteer browsers install chrome
 ```
 
 ## Usage
