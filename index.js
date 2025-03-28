@@ -1,5 +1,10 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const randomUseragent = require('random-useragent');
 const fs = require('fs').promises;
+
+// Add stealth plugin
+puppeteer.use(StealthPlugin());
 const path = require('path');
 const express = require('express');
 const app = express();
@@ -66,13 +71,16 @@ async function scrapeUrls(socket) {
         const outputDir = 'scraped_pages';
         await fs.mkdir(outputDir, { recursive: true });
 
-        // Launch browser
+        // Launch browser with stealth and random user agent
+        const userAgent = randomUseragent.getRandom();
         const browser = await puppeteer.launch({
             headless: 'new',
             executablePath: '/usr/bin/chromium-browser',
             args: [
                 '--no-sandbox',
-                '--disable-setuid-sandbox'
+                '--disable-setuid-sandbox',
+                '--disable-blink-features=AutomationControlled',
+                `--user-agent=${userAgent}`
             ]
         });
 
@@ -83,8 +91,17 @@ async function scrapeUrls(socket) {
                     message: `Processing: ${url}` 
                 });
                 
-                // Create new page
+                // Create new page with random user agent
                 const page = await browser.newPage();
+                await page.setUserAgent(userAgent);
+                
+                // Set additional properties to avoid detection
+                await page.evaluateOnNewDocument(() => {
+                    // Pass webdriver check
+                    Object.defineProperty(navigator, 'webdriver', {
+                        get: () => undefined
+                    });
+                });
                 
                 // Navigate to URL with timeout
                 await page.goto(url, {
