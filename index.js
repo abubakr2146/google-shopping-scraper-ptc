@@ -65,9 +65,19 @@ async function scrapeUrls(socket) {
         const outputDir = 'scraped_pages';
         await fs.mkdir(outputDir, { recursive: true });
 
-        // Launch browser
+        // Launch browser with specific configuration for Linux servers
         const browser = await puppeteer.launch({
-            headless: 'new'
+            headless: 'new',
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--disable-gpu'
+            ],
+            executablePath: process.env.CHROME_BIN || null // Will use the installed Chrome or Chromium
         });
 
         // Process each URL
